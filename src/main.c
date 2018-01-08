@@ -30,15 +30,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+//#include <cmath>
 //#include "stm32f10x_exti.h"
 //#include "diag/Trace.h"
 
 #include <stdint.h>
 #include "stm32f10x.h"
 
-
 #include "Timer.h"
-//#include "BlinkLed.h"
+//#include "expander.hpp"
+
+#define MCP_IODIR		0x00
+#define MCP_IPOL		0x01
+#define MCP_GPINTEN		0x02
+#define MCP_DEFVAL		0x03
+#define MCP_INTCON		0x04
+#define MCP_IOCON		0x05
+#define MCP_GPPU		0x06
+#define MCP_INTF		0x07
+#define MCP_INTCAP		0x08
+#define MCP_GPIO		0x09
+#define MCP_OLAT		0x0a
 
 // ----------------------------------------------------------------------------
 //
@@ -178,6 +190,65 @@ static int getDistance() {
 	return delay;
 }
 
+void leftForward() {
+	TIM_OCInitTypeDef  channel;
+
+	TIM_OCStructInit(&channel);
+	channel.TIM_OCMode = TIM_OCMode_PWM1;
+	channel.TIM_OutputState = TIM_OutputState_Enable;
+	channel.TIM_Pulse = 1000;
+	TIM_OC1Init(TIM4, &channel);
+}
+
+void leftReverse();
+void leftStop() {
+	TIM_OCInitTypeDef  channel;
+
+	TIM_OCStructInit(&channel);
+	channel.TIM_OCMode = TIM_OCMode_PWM1;
+	channel.TIM_OutputState = TIM_OutputState_Enable;
+	channel.TIM_Pulse = 0;
+	TIM_OC1Init(TIM4, &channel);
+}
+
+void rightForward() {
+	TIM_OCInitTypeDef  channel;
+
+	TIM_OCStructInit(&channel);
+	channel.TIM_OCMode = TIM_OCMode_PWM1;
+	channel.TIM_OutputState = TIM_OutputState_Enable;
+	channel.TIM_Pulse = 1000;
+	TIM_OC2Init(TIM4, &channel);
+}
+
+void rightReverse();
+
+void rightStop() {
+	TIM_OCInitTypeDef  channel;
+
+	TIM_OCStructInit(&channel);
+	channel.TIM_OCMode = TIM_OCMode_PWM1;
+	channel.TIM_OutputState = TIM_OutputState_Enable;
+	channel.TIM_Pulse = 0;
+	TIM_OC2Init(TIM4, &channel);
+}
+
+uint8_t spi_sendrecv(uint8_t byte) {
+	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_TXE) == RESET);
+	SPI_I2S_SendData(SPI1, byte);
+
+	while (SPI_I2S_GetFlagStatus(SPI1, SPI_I2S_FLAG_RXNE) == RESET);
+	return SPI_I2S_ReceiveData(SPI1);
+}
+
+void mcp_write_reg(uint8_t addr, uint8_t value) {
+	GPIO_ResetBits(GPIOC, GPIO_Pin_0);
+	spi_sendrecv(0x40);
+	spi_sendrecv(addr);
+	spi_sendrecv(value);
+	GPIO_SetBits(GPIOC, GPIO_Pin_0);
+}
+
 int main(void)
 {
 	//PC5 jako wyjscie TRIG
@@ -188,11 +259,44 @@ int main(void)
 
 	GPIO_InitTypeDef gpio;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM4, ENABLE);
 
-	// Konfiguracja do silnika (PC0, PC1) oraz TRIG do czujnika odległości(PC5)
+	// EKSPANDER
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+
+    GPIO_InitTypeDef gpioExp;
+    GPIO_StructInit(&gpioExp);
+    gpioExp.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7; //SCK, MOSI
+    gpioExp.GPIO_Mode = GPIO_Mode_AF_PP;
+    gpioExp.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &gpioExp);
+
+    gpioExp.GPIO_Pin = GPIO_Pin_6; // MISO
+    gpioExp.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_Init(GPIOA, &gpioExp);
+
+    gpioExp.GPIO_Pin = GPIO_Pin_0; // CS
+    gpioExp.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_Init(GPIOC, &gpioExp);
+
+    GPIO_SetBits(GPIOC, GPIO_Pin_0);
+
+    SPI_InitTypeDef spi;
+
+    SPI_StructInit(&spi);
+    spi.SPI_Mode = SPI_Mode_Master;
+    spi.SPI_NSS = SPI_NSS_Soft;
+    spi.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
+    SPI_Init(SPI1, &spi);
+
+    SPI_Cmd(SPI1, ENABLE);
+
+    mcp_write_reg(MCP_IODIR, ~0x01);
+
+	//   TRIG do czujnika odległości(PC5) oraz ECHO (PC6)
 	GPIO_StructInit(&gpio);
-	gpio.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_5;
+	gpio.GPIO_Pin = GPIO_Pin_5;
 	gpio.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_Init(GPIOC, &gpio);
 
@@ -201,14 +305,36 @@ int main(void)
 	GPIO_Init(GPIOC, &gpio);
 
 
+	// Ustawienia silników PC6, PC7
+	gpio.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+	gpio.GPIO_Speed = GPIO_Speed_50MHz;
+	gpio.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_Init(GPIOB, &gpio);
+
+	// Konfiguracja timera do obsługi czujnika odległości
 	TIM_TimeBaseStructInit(&tim);
 	tim.TIM_CounterMode = TIM_CounterMode_Up;
 	tim.TIM_Prescaler = 32 - 1;
 	tim.TIM_Period = 2;
 	TIM_TimeBaseInit(TIM2, &tim);
 
+	tim.TIM_Prescaler = 64 - 1;
+	tim.TIM_Period = 20000;
+	TIM_TimeBaseInit(TIM4, &tim);
+
+	TIM_OCInitTypeDef  channel;
+
+	TIM_OCStructInit(&channel);
+	channel.TIM_OCMode = TIM_OCMode_PWM1;
+	channel.TIM_OutputState = TIM_OutputState_Enable;
+	channel.TIM_Pulse = 1000;
+	TIM_OC1Init(TIM4, &channel);
+	channel.TIM_Pulse =1000;
+	TIM_OC2Init(TIM4, &channel);
+
 	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM2, ENABLE);
+	TIM_Cmd(TIM4, ENABLE);
 
 	nvic.NVIC_IRQChannel = TIM2_IRQn;
 	nvic.NVIC_IRQChannelPreemptionPriority = 0;
@@ -217,17 +343,24 @@ int main(void)
 	NVIC_Init(&nvic);
 	timer_start();
 
+	// TEMP
+	// TEMP
+
 	while(1) {
+		//mcp_write_reg(MCP_OLAT, 0x01);
+		//mcp_write_reg(MCP_OLAT, 0x00);
 		int i = getDistance();
-		trace_printf("distance: %d\n", i);
-		if(i > 200) {
-			int count = 100;
-			while (count--) {
-				GPIO_SetBits(GPIOC, 3);
-				timer_sleep(1);
-				GPIO_ResetBits(GPIOC, 3);
-				timer_sleep(20);
-			}
+		//trace_printf("distance: %d\n", i);
+		if(i < 400) {
+			leftStop();
+			rightStop();
+//			timer_sleep(10000);
+//			rightForward();
+//			timer_sleep(1000);
+//			rightStop();
+		} else {
+			leftForward();
+			rightForward();
 		}
 	}
 
