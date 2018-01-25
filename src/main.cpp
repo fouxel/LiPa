@@ -38,7 +38,8 @@
 #include "stm32f10x.h"
 
 #include "Timer.h"
-#include "expander.hpp"
+#include "gpio.hpp"
+//#include "expander.hpp"
 
 // ----------------------------------------------------------------------------
 //
@@ -84,6 +85,18 @@
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
 
+#define MCP_IODIR		0x00
+#define MCP_IPOL		0x01
+#define MCP_GPINTEN		0x02
+#define MCP_DEFVAL		0x03
+#define MCP_INTCON		0x04
+#define MCP_IOCON		0x05
+#define MCP_GPPU		0x06
+#define MCP_INTF		0x07
+#define MCP_INTCAP		0x08
+#define MCP_GPIO		0x09
+#define MCP_OLAT		0x0a
+
 uint16_t _ports[] = { GPIO_Pin_0, GPIO_Pin_1, GPIO_Pin_2, GPIO_Pin_3 };
 
 
@@ -125,7 +138,7 @@ static uint32_t timer_stopTimer() {
 	return _timerUs;
 }
 
-void TIM2_IRQHandler()
+extern "C" { void TIM2_IRQHandler()
 {
  if (TIM_GetITStatus(TIM2, TIM_IT_Update) == SET)
  {
@@ -134,6 +147,7 @@ void TIM2_IRQHandler()
 			_timerUs++;
 		}
  }
+}
 }
 float calc_pwm(float val)
 {
@@ -250,8 +264,12 @@ int main(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM4, ENABLE);
 
 	// EKSPANDER
+
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+
+	GPIO gpioSCK_MOSI(GPIO_Pin_5 | GPIO_Pin_7, GPIOA, GPIO_Mode_AF_PP);
+	gpioSCK_MOSI.init();
 
     GPIO_InitTypeDef gpioExp;
     GPIO_StructInit(&gpioExp);
@@ -335,13 +353,12 @@ int main(void)
 	// TEMP
 
 	while(1) {
-		//mcp_write_reg(MCP_OLAT, 0x01);
-		//mcp_write_reg(MCP_OLAT, 0x00);
 		int i = getDistance();
-		//trace_printf("distance: %d\n", i);
+	//	trace_printf("distance: %d\n", i);
 		if(i < 400) {
 			leftStop();
 			rightStop();
+			mcp_write_reg(MCP_OLAT, 0x00);
 //			timer_sleep(10000);
 //			rightForward();
 //			timer_sleep(1000);
@@ -349,6 +366,7 @@ int main(void)
 		} else {
 			leftForward();
 			rightForward();
+			mcp_write_reg(MCP_OLAT, 0x01);
 		}
 	}
 

@@ -10,12 +10,13 @@
 #include <memory>
 
 Sensor::Sensor() {
-	auto test = 15;
-	std::vector<int> vector;
-	std::shared_ptr<int> tes;
 
 }
 
 Sensor::~Sensor() {
+
+}
+
+int Sensor::getDistance() {
 
 }

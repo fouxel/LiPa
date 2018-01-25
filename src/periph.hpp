@@ -10,12 +10,9 @@
 
 class Periph {
 public:
-	Periph();
-	virtual ~Periph();
+	virtual ~Periph() {}
 
 	virtual bool init() = 0;
 };
-
-
 
 #endif /* PERIPH_HPP_ */

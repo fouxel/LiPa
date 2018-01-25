@@ -8,11 +8,18 @@
 #ifndef PORT_HPP_
 #define PORT_HPP_
 
+#include "periph.hpp"
+
 class Port : public Periph{
 public:
-	Port();
-
 	virtual bool init() = 0;
+
+	virtual void set() = 0;
+	virtual void reset() = 0;
+
+	virtual bool read() = 0;
+
+	virtual ~Port() {}
 };
 
 

@@ -9,25 +9,26 @@
 #define EXPANDER_HPP_
 
 #include "periph.hpp"
+#include "gpio.hpp"
+#include "iexpander.hpp"
 
-#define MCP_IODIR		0x00
-#define MCP_IPOL		0x01
-#define MCP_GPINTEN		0x02
-#define MCP_DEFVAL		0x03
-#define MCP_INTCON		0x04
-#define MCP_IOCON		0x05
-#define MCP_GPPU		0x06
-#define MCP_INTF		0x07
-#define MCP_INTCAP		0x08
-#define MCP_GPIO		0x09
-#define MCP_OLAT		0x0a
-
-class Expander {
+class Expander: public IExpander{
 public:
 	Expander();
 	virtual ~Expander();
 
 	void init();
+
+	void setPin(pin_t pin);
+	void resetPin(pin_t pin);
+
+	bool readPin(pin_t pin);
+
+private:
+	GPIO gpioCS;
+
+	void writeReg(uint8_t addr, uint8_t value);
+	uint8_t readReg(uint8_t addr);
 };
 
 #endif /* EXPANDER_HPP_ */

@@ -16,7 +16,12 @@ class GPIO : public Port{
 public:
 	GPIO(uint16_t pin, GPIO_TypeDef* gpiox, GPIOMode_TypeDef mode, GPIOSpeed_TypeDef speed = GPIO_Speed_50MHz);
 
-	virtual bool init();
+	bool init();
+
+	void set();
+	void reset();
+
+	bool read();
 
 private:
 	GPIO_InitTypeDef m_gpio;

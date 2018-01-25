@@ -8,10 +8,14 @@
 #ifndef SENSOR_H_
 #define SENSOR_H_
 
-class Sensor {
+#include "isensor.hpp"
+
+class Sensor : public ISensor {
 public:
 	Sensor();
 	virtual ~Sensor();
+
+	int getDistance();
 };
 
 
