@@ -39,7 +39,7 @@
 
 #include "Timer.h"
 #include "gpio.hpp"
-//#include "expander.hpp"
+#include "expander.hpp"
 
 // ----------------------------------------------------------------------------
 //
@@ -264,7 +264,8 @@ int main(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM4, ENABLE);
 
 	// EKSPANDER
-
+	Expander expander;
+/*
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 
@@ -299,7 +300,7 @@ int main(void)
     SPI_Cmd(SPI1, ENABLE);
 
     mcp_write_reg(MCP_IODIR, ~0x01);
-
+*/
 	//   TRIG do czujnika odległości(PC5) oraz ECHO (PC6)
 	GPIO_StructInit(&gpio);
 	gpio.GPIO_Pin = GPIO_Pin_5;
@@ -358,7 +359,7 @@ int main(void)
 		if(i < 400) {
 			leftStop();
 			rightStop();
-			mcp_write_reg(MCP_OLAT, 0x00);
+			expander.resetPin(0);//mcp_write_reg(MCP_OLAT, 0x00);
 //			timer_sleep(10000);
 //			rightForward();
 //			timer_sleep(1000);
@@ -366,7 +367,8 @@ int main(void)
 		} else {
 			leftForward();
 			rightForward();
-			mcp_write_reg(MCP_OLAT, 0x01);
+			expander.setPin(0);
+			//mcp_write_reg(MCP_OLAT, 0x01);
 		}
 	}
 

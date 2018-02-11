@@ -31,3 +31,7 @@ void GPIO::set() {
 void GPIO::reset() {
 	GPIO_ResetBits(m_gpiox, m_pin);
 }
+
+bool GPIO::read() {
+	return true; // TODO
+}

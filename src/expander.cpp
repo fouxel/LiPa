@@ -60,6 +60,12 @@ Expander::Expander():
 	//WriteReg(MCP_GPPU, 0x02);
 }
 
+Expander::~Expander() {}
+
+void Expander::init() {
+
+}
+
 void Expander::setPin(pin_t pin) {
 	writeReg(MCP_OLAT, 1 << pin);
 }
