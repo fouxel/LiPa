@@ -2,6 +2,7 @@
 #define LINE_H
 
 #include <QGraphicsItem>
+#include <functional>
 #include "imodel.h"
 
 namespace sim {

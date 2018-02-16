@@ -2,7 +2,6 @@
 
 #include <QGraphicsScene>
 #include <QPainter>
-#include <QRandomGenerator>
 #include <QStyleOption>
 #include <qmath.h>
 

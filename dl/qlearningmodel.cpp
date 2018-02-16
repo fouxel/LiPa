@@ -1,13 +1,18 @@
 #include "qlearningmodel.h"
 #include <algorithm>
 #include <functional>
+#include <AIToolbox/MDP/Policies/QGreedyPolicy.hpp>
+#include <AIToolbox/MDP/Algorithms/QLearning.hpp>
+
+#include <iostream>
+#include <ctime>
 
 using namespace ai;
 
-QLearningModel::QLearningModel():
-m_solver(STATES_COUNT, ACTIONS_COUNT)
+QLearningModel::QLearningModel()
 {
-
+    m_solver.reset(new AIToolbox::MDP::QLearning(STATES_COUNT, ACTIONS_COUNT));
+    std::srand(std::time(nullptr));
 }
 
 QLearningModel::~QLearningModel()
@@ -19,7 +24,7 @@ float QLearningModel::getDiffReward(distvec& distances) const
 {
     int sum = 0;
 
-    std::vector<int> diffs;
+    std::vector<int> diffs(5);
     std::transform( m_prevDistances.begin(), m_prevDistances.end(),
                 distances.begin(), diffs.begin(), std::minus<int>());
     
@@ -36,11 +41,18 @@ float QLearningModel::getDiffReward(distvec& distances) const
 
 bool QLearningModel::isTerminalState(distvec &distances) const
 {
-    auto iter = std::find(distances.begin(), distances.end(), 10);
+    /*
+      std::transform(distances.begin(), distances.end(), normalizedDistances.begin(),
+		   [](int distance) -> int { return (distance/10) + 1; });
+     */
+  
+    auto iter = std::find_if(distances.begin(), distances.end(),
+		[](int dist) -> bool { return dist <= 10; }
+    );
     if (iter == distances.end()) {
-	return true;
+	return false;
     }
-    return false;
+    return true;
 }
 
 bool QLearningModel::isOppositeToPrevAction(Action currAction) const {
@@ -54,15 +66,16 @@ bool QLearningModel::isOppositeToPrevAction(Action currAction) const {
 
 std::size_t QLearningModel::encodeState(QLearningModel::distvec& distances) const
 {
-    std::vector<int> normalizedDistances;
+    std::vector<int> normalizedDistances(5);
     std::transform(distances.begin(), distances.end(), normalizedDistances.begin(),
 		   [](int distance) -> int { return (distance/10) + 1; });
-    std::size_t state;
+    std::size_t state = 0;
     unsigned multiplier = 1;
     for (int d : normalizedDistances) {
 	state += multiplier * d;
 	multiplier *= 6; //6 is a max value for normalizedDistance
     }
+    std::cout << "state: " << state <<  std::endl;
     return state;
 }
 
@@ -74,35 +87,47 @@ CoordType decodeState(size_t state) {
         state /= SQUARE_SIZE;
     }
     return coords;
-}
- */
-
+}*/
+ 
 IModel::Action QLearningModel::getAction(distvec &distances)
 {
-    if (isInitialState()) {
+    static int t = 0;
+    t++;
+    if (isInitialState()) { 
+	std::cout <<"InitialState!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 	// Pick default action;
-	return ACTION_FORWARD;
+	m_prevDistances = distances;
+	m_prevAction = static_cast<Action>(t % 3);
+        return m_prevAction;
     }
-    
+    for (auto c : distances) {
+	std::cout << "dist" << c << std::endl;
+    }
     // First, calculate the reward for the previous action.
     if (isTerminalState(distances)) {
+	std::cout << "Terminal state" << std::endl;
 	//             void stepUpdateQ(size_t s, size_t a, size_t s1, double rew);
-	m_solver.stepUpdateQ(encodeState(m_prevDistances), m_prevAction, encodeState(distances), -100);
+	m_solver->stepUpdateQ(encodeState(m_prevDistances), m_prevAction, encodeState(distances), -10000);
 	return ACTION_TERMINATE;
     }
 
     float diffReward = getDiffReward(distances);
 
     //Pick current action
-    AIToolbox::MDP::QGreedyPolicy policy(m_solver.getQFunction());
-    auto action = static_cast<Action>(policy.sampleAction(encodeState(distances)));
-    
+    AIToolbox::MDP::QGreedyPolicy policy(m_solver->getQFunction());
+    Action action = ACTION_FORWARD;
+    //if (t++ > 30) {
+      action = static_cast<Action>(policy.sampleAction(encodeState(distances)));
+    //} else {
+    //  action = static_cast<Action>(std::rand() % 3);
+    //}
     float oppositeReward = 0;
     if (isOppositeToPrevAction(action)) {
 	oppositeReward = -0.8f;
     }
     
     float actionReward = 0;
+    std::cout << "Action: " << action << std::endl;
     switch (action) {
       case ACTION_FORWARD:
 	actionReward = 0.2;
@@ -112,14 +137,21 @@ IModel::Action QLearningModel::getAction(distvec &distances)
 	actionReward = -0.1;
 	break;
       default:
-	abort();
+	std::cout << "Bad action" << std::endl;
+	break;
+	//abort();
     }
 
     float totalReward = actionReward + diffReward + oppositeReward;
     //NOTE pass here m_prevAction or current action?
-    m_solver.stepUpdateQ(encodeState(m_prevDistances), m_prevAction, encodeState(distances), totalReward);
+    m_solver->stepUpdateQ(encodeState(m_prevDistances), m_prevAction, encodeState(distances), totalReward);
     
-    return ACTION_LEFT;
+    m_prevDistances.clear();
+    for (auto e : distances) {
+      m_prevDistances.push_back(e);
+    }
+    m_prevAction = action;
+    return action;
 }
 
 bool QLearningModel::isInitialState() const {

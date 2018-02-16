@@ -2,8 +2,11 @@
 #define QLEARNINGMODEL_H
 
 #include "imodel.h"
-#include <AIToolbox/MDP/Algorithms/QLearning.hpp>
-#include <AIToolbox/MDP/Policies/QGreedyPolicy.hpp>
+#include <memory>
+
+namespace AIToolbox::MDP {
+  class QLearning;
+}
 
 namespace ai {
 
@@ -23,7 +26,6 @@ public:
     ~QLearningModel();
 
     Action getAction(distvec &distances) override;
-
 private:
     bool isInitialState() const;
     bool isOppositeToPrevAction(Action currAction) const;
@@ -32,10 +34,10 @@ private:
     size_t encodeState(distvec &distances) const;
 
     Action m_prevAction;
-    distvec m_prevDistances;
-    AIToolbox::MDP::QLearning m_solver;
-    constexpr static int STATES_COUNT = 100;
-    constexpr static int ACTIONS_COUNT = 4;
+    std::vector<int> m_prevDistances;
+    constexpr static int STATES_COUNT = 10000;
+    constexpr static int ACTIONS_COUNT = 3;
+    std::unique_ptr<AIToolbox::MDP::QLearning> m_solver;
   };
 
 }

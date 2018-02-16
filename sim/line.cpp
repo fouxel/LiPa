@@ -2,9 +2,10 @@
 
 #include <QGraphicsScene>
 #include <QPainter>
-#include <QRandomGenerator>
+#include <QPainterPath>
 #include <QStyleOption>
 #include <qmath.h>
+#include "imodel.h"
 
 using namespace sim;
 
@@ -67,9 +68,12 @@ void Line::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
         painter->drawLine(line);
     }
 }
-
+#include <iostream>
 void Line::advance(int step)
 {
+  
+  std::cout << "X: " << pos().x() << std::endl;
+  std::cout << "Y: " << pos().y() << std::endl;
     if (!step)
         return;
     std::vector<int> distances;
@@ -96,16 +100,21 @@ void Line::advance(int step)
     auto action = m_model.getAction(distances);
     switch(action) {
         case ai::IModel::ACTION_FORWARD:
-        setRotation(0);
-            setPos(mapToParent(0, -1.f));
+	    setRotation(0);
+            setPos(mapToParent(0, -10.f));
             break;
         case ai::IModel::ACTION_LEFT:
-            setRotation(-45);
-            setPos(mapToParent(0, -1.f));
+            setRotation(90);
+            setPos(mapToParent(0, -10.f));
             break;
         case ai::IModel::ACTION_RIGHT:
-            setRotation(45);
-            setPos(mapToParent(0, -1.f));
+            setRotation(90);
+            setPos(mapToParent(0, -10.f));
             break;
+	case ai::IModel::ACTION_TERMINATE:
+	    //resetTransform();
+	    setRotation(0);
+            setPos(150, 150);
+	    break;
     }
 }
