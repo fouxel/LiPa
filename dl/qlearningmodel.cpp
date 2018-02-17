@@ -93,7 +93,7 @@ IModel::Action QLearningModel::getAction(distvec &distances)
 {
     static int t = 0;
     t++;
-    if (isInitialState()) { 
+    if (isInitialState()) {
 	std::cout <<"InitialState!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
 	// Pick default action;
 	m_prevDistances = distances;

@@ -100,7 +100,6 @@ void Line::advance(int step)
     auto action = m_model.getAction(distances);
     switch(action) {
         case ai::IModel::ACTION_FORWARD:
-	    setRotation(0);
             setPos(mapToParent(0, -10.f));
             break;
         case ai::IModel::ACTION_LEFT:
@@ -108,11 +107,10 @@ void Line::advance(int step)
             setPos(mapToParent(0, -10.f));
             break;
         case ai::IModel::ACTION_RIGHT:
-            setRotation(90);
+            setRotation(-90);
             setPos(mapToParent(0, -10.f));
             break;
 	case ai::IModel::ACTION_TERMINATE:
-	    //resetTransform();
 	    setRotation(0);
             setPos(150, 150);
 	    break;
