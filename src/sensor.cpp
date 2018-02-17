@@ -6,17 +6,11 @@
  */
 
 #include "sensor.h"
-#include <vector>
 #include <memory>
+#include <vector>
 
-Sensor::Sensor() {
+Sensor::Sensor() {}
 
-}
+Sensor::~Sensor() {}
 
-Sensor::~Sensor() {
-
-}
-
-int Sensor::getDistance() {
-
-}
+int Sensor::getDistance() {}

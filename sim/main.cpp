@@ -52,62 +52,61 @@
 
 #include <math.h>
 
-#include "mouse.h"
-#include "line.h"
-#include "world.h"
 #include "imodel.h"
+#include "line.h"
+#include "mouse.h"
 #include "qlearningmodel.h"
+#include "world.h"
 
-static const int MouseCount =0;
+static const int MouseCount = 0;
 
 //! [0]
-int main(int argc, char **argv)
-{
-    QApplication app(argc, argv);
-//! [0]
+int main(int argc, char **argv) {
+  QApplication app(argc, argv);
+  //! [0]
 
-//! [1]
-    QGraphicsScene scene;
-    scene.setSceneRect(0, 0, 300, 300);
-//! [1] //! [2]
-    scene.setItemIndexMethod(QGraphicsScene::NoIndex);
-//! [2]
+  //! [1]
+  QGraphicsScene scene;
+  scene.setSceneRect(0, 0, 300, 300);
+  //! [1] //! [2]
+  scene.setItemIndexMethod(QGraphicsScene::NoIndex);
+  //! [2]
 
-//! [3]
-    ai::QLearningModel model;
-    for (int i = 0; i < MouseCount; ++i) {
-        Mouse *mouse = new Mouse;
-        mouse->setPos(100, 100);
-        scene.addItem(mouse);
-    }
-    auto world = new sim::World();
-    world->setPos(20, 150);
-    scene.addItem(world);
+  //! [3]
+  ai::QLearningModel model;
+  for (int i = 0; i < MouseCount; ++i) {
+    Mouse *mouse = new Mouse;
+    mouse->setPos(100, 100);
+    scene.addItem(mouse);
+  }
+  auto world = new sim::World();
+  world->setPos(20, 150);
+  scene.addItem(world);
 
-    auto *line = new sim::Line(world->getPaths(), world, model);
-    line->setPos(150, 150);
-    scene.addItem(line);
+  auto *line = new sim::Line(world->getPaths(), world, model);
+  line->setPos(150, 150);
+  scene.addItem(line);
 
-//! [3]
+  //! [3]
 
-//! [4]
-    QGraphicsView view(&scene);
-    view.setRenderHint(QPainter::Antialiasing);
+  //! [4]
+  QGraphicsView view(&scene);
+  view.setRenderHint(QPainter::Antialiasing);
   //  view.setBackgroundBrush(QPixmap(":/images/cheese.jpg"));
-//! [4] //! [5]
-   // view.setCacheMode(QGraphicsView::CacheBackground);
-    view.setCacheMode(QGraphicsView::CacheNone);
-    view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-    view.setDragMode(QGraphicsView::ScrollHandDrag);
-//! [5] //! [6]
-    view.setWindowTitle(QT_TRANSLATE_NOOP(QGraphicsView, "Colliding Mice"));
-    view.resize(400, 300);
-    view.show();
+  //! [4] //! [5]
+  // view.setCacheMode(QGraphicsView::CacheBackground);
+  view.setCacheMode(QGraphicsView::CacheNone);
+  view.setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+  view.setDragMode(QGraphicsView::ScrollHandDrag);
+  //! [5] //! [6]
+  view.setWindowTitle(QT_TRANSLATE_NOOP(QGraphicsView, "Colliding Mice"));
+  view.resize(400, 300);
+  view.show();
 
-    QTimer timer;
-    QObject::connect(&timer, SIGNAL(timeout()), &scene, SLOT(advance()));
-    timer.start(1000 / 33);
+  QTimer timer;
+  QObject::connect(&timer, SIGNAL(timeout()), &scene, SLOT(advance()));
+  timer.start(1000 / 33);
 
-    return app.exec();
+  return app.exec();
 }
 //! [6]
