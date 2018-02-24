@@ -7,6 +7,7 @@
 #include <QStyleOption>
 #include <iostream>
 #include <qmath.h>
+#include <easylogging++.h>
 
 using namespace sim;
 
@@ -41,9 +42,6 @@ void Line::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 }
 
 void Line::advance(int step) {
-
-  std::cout << "X: " << pos().x() << std::endl;
-  std::cout << "Y: " << pos().y() << std::endl;
   if (!step)
     return;
   std::vector<int> distances;
@@ -66,18 +64,18 @@ void Line::advance(int step) {
       }
     }
   }
-
+  auto rot = rotation();
   auto action = m_model.getAction(distances);
   switch (action) {
   case ai::IModel::ACTION_FORWARD:
     setPos(mapToParent(0, -10.f));
     break;
   case ai::IModel::ACTION_LEFT:
-    setRotation(90);
+    setRotation(rot+60);
     setPos(mapToParent(0, -10.f));
     break;
   case ai::IModel::ACTION_RIGHT:
-    setRotation(-90);
+    setRotation(rot-60);
     setPos(mapToParent(0, -10.f));
     break;
   case ai::IModel::ACTION_TERMINATE:

@@ -35,6 +35,7 @@ void World::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 
   QPainterPath &p = *(m_paths[0]);
   painter->drawPath(p);
+  scene()->update();
 }
 
 void World::advance(int step) {

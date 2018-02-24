@@ -22,11 +22,11 @@ int Sim::run(int argc, char **argv) {
   ai::QLearningModel model;
   auto world = new sim::World();
   world->setPos(20, 150);
-  scene.addItem(world);
 
   auto *line = new sim::Line(world->getPaths(), world, model);
   line->setPos(150, 150);
   scene.addItem(line);
+  scene.addItem(world);
 
   //! [3]
 

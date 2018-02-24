@@ -1,11 +1,15 @@
 #include "qlearningmodel.h"
 #include <AIToolbox/MDP/Algorithms/QLearning.hpp>
 #include <AIToolbox/MDP/Policies/QGreedyPolicy.hpp>
+
 #include <algorithm>
 #include <functional>
-
+#include <easylogging++.h>
 #include <ctime>
 #include <iostream>
+
+#include "statecoder.h"
+#include "normalizer.h"
 
 using namespace ai;
 
@@ -16,7 +20,7 @@ QLearningModel::QLearningModel() {
 
 QLearningModel::~QLearningModel() {}
 
-float QLearningModel::getDiffReward(distvec &distances) const {
+float QLearningModel::getDiffReward(cdistvec &distances) const {
   int sum = 0;
 
   std::vector<int> diffs(5);
@@ -34,13 +38,7 @@ float QLearningModel::getDiffReward(distvec &distances) const {
   return reward;
 }
 
-bool QLearningModel::isTerminalState(distvec &distances) const {
-  /*
-    std::transform(distances.begin(), distances.end(),
-    normalizedDistances.begin(),
-                 [](int distance) -> int { return (distance/10) + 1; });
-   */
-
+bool QLearningModel::isTerminalState(cdistvec &distances) const {
   auto iter = std::find_if(distances.begin(), distances.end(),
                            [](int dist) -> bool { return dist <= 10; });
   if (iter == distances.end()) {
@@ -59,43 +57,21 @@ bool QLearningModel::isOppositeToPrevAction(Action currAction) const {
 }
 
 std::size_t
-QLearningModel::encodeState(QLearningModel::distvec &distances) const {
-  std::vector<int> normalizedDistances(5);
-  std::transform(distances.begin(), distances.end(),
-                 normalizedDistances.begin(),
-                 [](int distance) -> int { return (distance / 10) + 1; });
-  std::size_t state = 0;
-  unsigned multiplier = 1;
-  for (int d : normalizedDistances) {
-    state += multiplier * d;
-    multiplier *= 6; // 6 is a max value for normalizedDistance
-  }
-  std::cout << "state: " << state << std::endl;
-  return state;
+QLearningModel::encodeState(cdistvec &distances) const {
+  std::vector<int> normalizedDistances = Normalizer::normalize(distances); 
+  return StateCoder::encode(normalizedDistances, 5);
 }
 
-/*
-CoordType decodeState(size_t state) {
-    CoordType coords;
-    for ( auto & c : coords ) {
-        c = state % SQUARE_SIZE;
-        state /= SQUARE_SIZE;
-    }
-    return coords;
-}*/
-
-IModel::Action QLearningModel::getAction(distvec &distances) {
-  static int t = 0;
-  t++;
+IModel::Action QLearningModel::getAction(cdistvec &distances) {
   if (isInitialState()) {
-    std::cout << "InitialState!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     // Pick default action;
     m_prevDistances = distances;
-    m_prevAction = static_cast<Action>(t % 3);
+    m_prevAction = ACTION_LEFT;
     return m_prevAction;
   }
   for (auto c : distances) {
     std::cout << "dist" << c << std::endl;
+    LOG(INFO) << "dist" << c;
   }
   // First, calculate the reward for the previous action.
   if (isTerminalState(distances)) {
@@ -124,7 +100,7 @@ IModel::Action QLearningModel::getAction(distvec &distances) {
     break;
   case ACTION_LEFT:
   case ACTION_RIGHT:
-    actionReward = -0.1;
+    actionReward = -0.8;
     break;
   default:
     std::cout << "Bad action" << std::endl;

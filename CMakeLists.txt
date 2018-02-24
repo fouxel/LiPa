@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0)
 project(lipa)
 
+enable_testing()
+
 add_subdirectory(dl)
 add_subdirectory(sim)
 add_executable(main main.cpp)
