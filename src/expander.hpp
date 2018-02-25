@@ -14,7 +14,7 @@
 
 class Expander: public IExpander{
 public:
-	Expander();
+	Expander(uint8_t dir);
 	virtual ~Expander();
 
 	void init();
@@ -25,8 +25,8 @@ public:
 	bool readPin(pin_t pin);
 
 private:
+	pin_t m_pin;
 	GPIO gpioCS;
-
 	void writeReg(uint8_t addr, uint8_t value);
 	uint8_t readReg(uint8_t addr);
 };

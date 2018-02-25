@@ -34,7 +34,7 @@ uint8_t spi_sendrecv(uint8_t byte) {
 
 } // namespace
 
-Expander::Expander() : gpioCS(GPIO_Pin_0, GPIOC, GPIO_Mode_Out_PP) {
+Expander::Expander(uint8_t dir) : gpioCS(GPIO_Pin_0, GPIOC, GPIO_Mode_Out_PP) {
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 
@@ -55,19 +55,26 @@ Expander::Expander() : gpioCS(GPIO_Pin_0, GPIOC, GPIO_Mode_Out_PP) {
   SPI_Init(SPI1, &spi);
   SPI_Cmd(SPI1, ENABLE);
 
-  writeReg(MCP_IODIR, ~0x01);
-  // WriteReg(MCP_GPPU, 0x02);
+  //writeReg(MCP_IODIR, ~0x01);
+  writeReg(MCP_IODIR, dir); //~0x03);
+  m_pin = 0;
 }
 
 Expander::~Expander() {}
 
 void Expander::init() {}
 
-void Expander::setPin(pin_t pin) { writeReg(MCP_OLAT, 1 << pin); }
+void Expander::setPin(pin_t pin) {
+	m_pin |= 1 << pin;
+	writeReg(MCP_OLAT, m_pin);
+}
 
-void Expander::resetPin(pin_t pin) { writeReg(MCP_OLAT, 0 << pin); }
+void Expander::resetPin(pin_t pin) {
+	m_pin &= ~(1 << pin);
+	writeReg(MCP_OLAT, m_pin);
+}
 
-bool Expander::readPin(pin_t pin) { return readReg(MCP_GPIO); }
+bool Expander::readPin(pin_t pin) { return (readReg(MCP_GPIO) & pin); }
 
 void Expander::writeReg(uint8_t addr, uint8_t value) {
   gpioCS.reset();

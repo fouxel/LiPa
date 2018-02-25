@@ -25,5 +25,5 @@ void GPIO::set() { GPIO_SetBits(m_gpiox, m_pin); }
 void GPIO::reset() { GPIO_ResetBits(m_gpiox, m_pin); }
 
 bool GPIO::read() {
-  return true; // TODO
+  return GPIO_ReadInputDataBit(m_gpiox, m_pin);
 }

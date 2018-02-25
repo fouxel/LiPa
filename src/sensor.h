@@ -9,13 +9,22 @@
 #define SENSOR_H_
 
 #include "isensor.hpp"
+#include "itimer.h"
+#include "gpio.hpp"
 
 class Sensor : public ISensor {
 public:
-	Sensor();
+	//TODO: This should not be a reference, but a shared_ptr.
+	Sensor(ITimer &timer, Port& echo, Port& trig);
 	virtual ~Sensor();
 
 	int getDistance();
+
+private:
+	ITimer &m_timer;
+	Port &m_echo;
+	Port &m_trig;
+	void generatePulse();
 };
 
 

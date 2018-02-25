@@ -10,7 +10,7 @@
 
 class ISensor {
 public:
-	virtual ~ISensor();
+	virtual ~ISensor() {}
 
 	virtual int getDistance() = 0;
 };
