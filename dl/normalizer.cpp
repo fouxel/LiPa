@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <functional>
 
-void Normalizer::Normalizer()
+Normalizer::Normalizer()
 {
 
 }

@@ -3,7 +3,7 @@ project(sim)
 
 set(CMAKE_AUTOMOC ON)
 
-include_directories(../dl)
+include_directories(../../dl)
 find_package(Qt5Widgets REQUIRED)
 
 add_library(sim STATIC

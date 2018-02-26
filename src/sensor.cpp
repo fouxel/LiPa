@@ -29,7 +29,7 @@ int Sensor::getDistance() {
 	  m_timer.start();
 	  while (m_echo.read() == 1) {
 		if (m_timer.time() > 10000) {
-		  return -1;
+		  return 1;
 		}
 	  }
 	  delay = m_timer.end();

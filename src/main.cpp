@@ -23,7 +23,6 @@
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
 std::unique_ptr<Timer> _timer;
-std::unique_ptr<Sensor> _sensor;
 
 extern "C" {
 void TIM2_IRQHandler() {
@@ -84,6 +83,18 @@ void rightStop() {
   GPIO trig(GPIO_Pin_5, GPIOC, GPIO_Mode_Out_PP);
  * */
 
+void send_char(uint16_t c)
+{
+    while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
+    USART_SendData(USART2, c);
+}
+
+uint16_t read_char()
+{
+	while (!USART_GetFlagStatus(USART2, USART_FLAG_RXNE));
+	return USART_ReceiveData(USART2);
+}
+
 int main(void) {
   TIM_TimeBaseInitTypeDef tim;
   NVIC_InitTypeDef nvic;
@@ -98,6 +109,22 @@ int main(void) {
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
 
+  GPIO_StructInit(&gpio);
+  gpio.GPIO_Pin = GPIO_Pin_2;
+  gpio.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOA, &gpio);
+
+  gpio.GPIO_Pin = GPIO_Pin_3;
+  gpio.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  GPIO_Init(GPIOA, &gpio);
+
+  USART_InitTypeDef uart;
+
+  USART_StructInit(&uart);
+  uart.USART_BaudRate = 115200;
+  USART_Init(USART2, &uart);
+
+  USART_Cmd(USART2, ENABLE);
 
   // 1 - wejscie, 0 - wyjscie
   Expander expander(0b11111010);
@@ -106,9 +133,10 @@ int main(void) {
   ExpanderPort expPortTrig2(expander, 2);
   ExpanderPort expPortEcho2(expander, 4);
 
+  constexpr auto SENSOR_COUNT = 2;
   _timer.reset(new Timer());
-  _sensor.reset(new Sensor(*(_timer.get()), expPortEcho, expPortTrig));
-  Sensor sensor2(*(_timer.get()), expPortEcho2, expPortTrig2);
+  std::array<Sensor, SENSOR_COUNT> sensors = { Sensor(*(_timer.get()), expPortEcho, expPortTrig),
+		  	  	  	  	  	  	   	   	   	   Sensor(*(_timer.get()), expPortEcho2, expPortTrig2) };
 
   // Ustawienia silników PC6, PC7
   gpio.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
@@ -144,17 +172,33 @@ int main(void) {
   NVIC_Init(&nvic);
 
   while (1) {
-    int i = _sensor->getDistance();
-    int i2 = sensor2.getDistance();
-    trace_printf("distance: %d\n", i);
-    trace_printf("distance2: %d\n", i2);
-    if (i < 400) {
-      leftStop();
-      rightStop();
-    } else {
-      leftForward();
-      rightForward();
+	//send_char(SENSOR_COUNT);
+	send_char(1); //Start sequence.
+	send_char(2); //Start sequence.
+    for(auto &sensor : sensors) {
+    	auto i = sensor.getDistance();
+        trace_printf("distance: %d\n", i);
+        i /= 4;
+        if (i > 0xFF) {
+        	i = 0xFF;
+        }
+        send_char(i);
     }
+
+    auto action = read_char();
+    trace_printf("action: %d\n", action);
+    //send_char(3);
+    //send_char(4); //end of transmission
+    //TODO: Read action
+
+    //send_char(i);
+    //if (i < 400) {
+    //  leftStop();
+    //  rightStop();
+    //} else {
+    //  leftForward();
+    //  rightForward();
+    //}
   }
 }
 

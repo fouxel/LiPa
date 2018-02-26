@@ -11,6 +11,8 @@ add_library(ai-model STATIC
       qlearningmodel.cpp
       statecoder.h
       statecoder.cpp
+      normalizer.h
+      normalizer.cpp
       /usr/local/include/easylogging++.cc
 )
 
