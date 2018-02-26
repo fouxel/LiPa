@@ -46,7 +46,7 @@ int Sim::run(int argc, char **argv) {
 
   QTimer timer;
   QObject::connect(&timer, SIGNAL(timeout()), &scene, SLOT(advance()));
-  timer.start(10000 / 20);
+  timer.start(10000 / 500);
 
   return app.exec();
 }
