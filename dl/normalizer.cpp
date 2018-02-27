@@ -12,6 +12,6 @@ distvec Normalizer::normalize(cdistvec &distances) {
   distvec normalizedDistances(distances.size());
   std::transform(distances.begin(), distances.end(),
                  normalizedDistances.begin(),
-                 [](int distance) -> int { return (distance / 10) + 1; });
+                 [](int distance) -> int { return (distance / 10); });
   return normalizedDistances;
 }

@@ -39,6 +39,7 @@ float QLearningModel::getDiffReward(cdistvec &distances) const {
 }
 
 bool QLearningModel::isTerminalState(cdistvec &distances) const {
+  // TODO: Check why it fails if dist < 10;
   auto iter = std::find_if(distances.begin(), distances.end(),
                            [](int dist) -> bool { return dist <= 10; });
   if (iter == distances.end()) {
@@ -69,11 +70,7 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
     m_prevAction = ACTION_LEFT;
     return m_prevAction;
   }
-  for (auto c : distances) {
-    std::cout << "dist" << c << std::endl;
-    LOG(INFO) << "dist" << c;
-  }
-  // First, calculate the reward for the previous action.
+
   if (isTerminalState(distances)) {
     std::cout << "Terminal state" << std::endl;
     m_solver->stepUpdateQ(encodeState(m_prevDistances), m_prevAction,
@@ -81,12 +78,11 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
     return ACTION_TERMINATE;
   }
 
-  float diffReward = getDiffReward(distances);
-
   // Pick current action
   AIToolbox::MDP::QGreedyPolicy policy(m_solver->getQFunction());
-  Action action = ACTION_FORWARD;
-  action = static_cast<Action>(policy.sampleAction(encodeState(distances)));
+  Action action = static_cast<Action>(policy.sampleAction(encodeState(distances)));
+  
+  float diffReward = getDiffReward(distances);
   float oppositeReward = 0;
   if (isOppositeToPrevAction(action)) {
     oppositeReward = -0.8f;
@@ -108,14 +104,14 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
   }
 
   float totalReward = actionReward + diffReward + oppositeReward;
-  // NOTE pass here m_prevAction or current action?
   m_solver->stepUpdateQ(encodeState(m_prevDistances), m_prevAction,
                         encodeState(distances), totalReward);
 
-  m_prevDistances.clear();
-  for (auto e : distances) {
-    m_prevDistances.push_back(e);
-  }
+  m_prevDistances = distances;
+  //m_prevDistances.clear();
+  //for (auto e : distances) {
+  //  m_prevDistances.push_back(e);
+  //}
   m_prevAction = action;
   return action;
 }
