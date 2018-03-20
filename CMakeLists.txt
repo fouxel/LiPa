@@ -3,7 +3,7 @@ project(lipa)
 
 enable_testing()
 
-add_subdirectory(dl)
+add_subdirectory(ai)
 add_subdirectory(controller)
 add_executable(main main.cpp)
 

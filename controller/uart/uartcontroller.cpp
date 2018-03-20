@@ -95,7 +95,7 @@ UartController::~UartController()
 int UartController::run(int argc, char **argv) {
     UartNormalizer norm;
     ai::QLearningModel model(norm);
-    char *portname = "/dev/ttyACM0";
+    const char *portname = "dev/ttyACM0";
     int fd;
     int wlen;
 

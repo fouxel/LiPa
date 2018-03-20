@@ -3,7 +3,7 @@ project(sim_controller)
 
 set(CMAKE_AUTOMOC ON)
 
-include_directories(../../dl)
+include_directories(../../ai)
 find_package(Qt5Widgets REQUIRED)
 
 add_library(sim_controller STATIC

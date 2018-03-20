@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(uart_controller)
 
-include_directories(../../dl)
+include_directories(../../ai)
 
 add_library(uart_controller STATIC
       uartcontroller.h
