@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jakub/workspace2/proj1/dl/build/testMain_automoc.cpp
+
+/home/jakub/workspace2/proj1/dl/imodel.h
+vector
+-
+
+/home/jakub/workspace2/proj1/dl/main.cpp
+iostream
+-
+AIToolbox/MDP/Experience.hpp
+-
+qlearningmodel.h
+/home/jakub/workspace2/proj1/dl/qlearningmodel.h
+
+/home/jakub/workspace2/proj1/dl/qlearningmodel.h
+imodel.h
+/home/jakub/workspace2/proj1/dl/imodel.h
+AIToolbox/MDP/Algorithms/QLearning.hpp
+-
+AIToolbox/MDP/Policies/QGreedyPolicy.hpp
+-
+

@@ -1,0 +1,6 @@
+/home/jakub/workspace2/proj1/dl/build/CMakeFiles/edit_cache.dir
+/home/jakub/workspace2/proj1/dl/build/CMakeFiles/rebuild_cache.dir
+/home/jakub/workspace2/proj1/dl/build/CMakeFiles/ai-model.dir
+/home/jakub/workspace2/proj1/dl/build/CMakeFiles/testMain.dir
+/home/jakub/workspace2/proj1/dl/build/CMakeFiles/ai-model_automoc.dir
+/home/jakub/workspace2/proj1/dl/build/CMakeFiles/testMain_automoc.dir

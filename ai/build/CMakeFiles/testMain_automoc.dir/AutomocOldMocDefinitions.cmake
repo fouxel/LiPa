@@ -1,0 +1,1 @@
+set(AM_OLD_COMPILE_SETTINGS "QT_CORE_LIB;QT_GUI_LIB;QT_NO_DEBUG;QT_WIDGETS_LIB ~~~ /usr/include/eigen3;/home/jakub/anaconda2/include/qt;/home/jakub/anaconda2/include/qt/QtWidgets;/home/jakub/anaconda2/include/qt/QtGui;/home/jakub/anaconda2/include/qt/QtCore;/home/jakub/anaconda2/./mkspecs/linux-g++;/usr/include ~~~  ~~~ FALSE ~~~ ")

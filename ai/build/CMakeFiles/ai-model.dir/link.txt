@@ -1,0 +1,2 @@
+/usr/bin/ar qc libai-model.a  CMakeFiles/ai-model.dir/qlearningmodel.cpp.o CMakeFiles/ai-model.dir/ai-model_automoc.cpp.o
+/usr/bin/ranlib libai-model.a
