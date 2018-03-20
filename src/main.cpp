@@ -127,16 +127,20 @@ int main(void) {
   USART_Cmd(USART2, ENABLE);
 
   // 1 - wejscie, 0 - wyjscie
-  Expander expander(0b11111010);
+  Expander expander(0b11101010);
   ExpanderPort expPortTrig(expander, 0);
   ExpanderPort expPortEcho(expander, 1);
   ExpanderPort expPortTrig2(expander, 2);
-  ExpanderPort expPortEcho2(expander, 4);
+  ExpanderPort expPortEcho2(expander, 3);
 
-  constexpr auto SENSOR_COUNT = 2;
+  ExpanderPort expPortTrig3(expander, 4);
+  ExpanderPort expPortEcho3(expander, 5);
+
+  constexpr auto SENSOR_COUNT = 3;
   _timer.reset(new Timer());
   std::array<Sensor, SENSOR_COUNT> sensors = { Sensor(*(_timer.get()), expPortEcho, expPortTrig),
-		  	  	  	  	  	  	   	   	   	   Sensor(*(_timer.get()), expPortEcho2, expPortTrig2) };
+		  	  	  	  	  	  	   	   	   	   Sensor(*(_timer.get()), expPortEcho2, expPortTrig2),
+											   Sensor(*(_timer.get()), expPortEcho3, expPortTrig3)};
 
   // Ustawienia silników PC6, PC7
   gpio.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
@@ -171,22 +175,55 @@ int main(void) {
   nvic.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&nvic);
 
+  leftStop();
+  rightStop();
   while (1) {
-	//send_char(SENSOR_COUNT);
-	send_char(1); //Start sequence.
-	send_char(2); //Start sequence.
     for(auto &sensor : sensors) {
     	auto i = sensor.getDistance();
-        trace_printf("distance: %d\n", i);
+
         i /= 4;
         if (i > 0xFF) {
         	i = 0xFF;
         }
+        trace_printf("distance send: %d\n", i);
         send_char(i);
+        _timer->sleep();
+        auto ack = read_char();
+        if (ack != i) {
+        	trace_printf("wrong ack! %d\n", ack);
+        }
     }
+    trace_printf("###########\n");
+    _timer->sleep();
 
     auto action = read_char();
+    action = 0;
     trace_printf("action: %d\n", action);
+
+    /*
+        ACTION_FORWARD, // Move forward.
+        ACTION_LEFT, // Turn left.
+        ACTION_RIGHT, // Turn right.
+        ACTION_TERMINATE // Agent reache
+     * */
+
+    if (action == 0) {
+    	leftForward();
+    	rightForward();
+    } else if (action == 1) {
+    	leftForward();
+    	rightStop();
+    } else if (action == 2) {
+    	rightForward();
+    	leftStop();
+    } else {
+    	rightStop();
+    	leftStop();
+    }
+
+    _timer->sleep(800000);
+    rightStop();
+    leftStop();
     //send_char(3);
     //send_char(4); //end of transmission
     //TODO: Read action

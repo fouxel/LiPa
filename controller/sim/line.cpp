@@ -47,9 +47,10 @@ void Line::advance(int step) {
   std::vector<int> distances;
   for (auto &line : m_lines) {
     int length = 50;
+    bool enough = false;
     while (length-- > 0) {
       line.setLength(length);
-      bool enough = false;
+
       for (const auto &path : m_paths) {
         if (path.get().contains(mapToItem(m_world, line.pointAt(1)))) {
 
@@ -62,6 +63,10 @@ void Line::advance(int step) {
         distances.push_back(length);
         break;
       }
+    }
+    if (enough == false) {
+      distances.push_back(1);
+      
     }
   }
   auto rot = rotation();

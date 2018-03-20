@@ -41,3 +41,17 @@ void Timer::interrupt() {
 		++m_count;
 	}
 }
+
+void Timer::sleep() {
+	start();
+	while(m_count < 10000) {
+	}
+	end();
+}
+
+void Timer::sleep(size_t time) {
+	start();
+	while(m_count < time) {
+	}
+	end();
+}

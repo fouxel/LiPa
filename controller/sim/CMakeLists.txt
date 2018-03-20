@@ -13,6 +13,9 @@ add_library(sim STATIC
 	    sim.cpp
 	    world.h
 	    world.cpp
+	    normalizer.cpp
+	    normalizer.h
 )
 
 target_link_libraries(sim Qt5::Widgets)
+add_subdirectory(tests)

@@ -20,6 +20,11 @@ public:
 
 	virtual size_t end() = 0;
 
+	virtual void sleep() = 0;
+
+	virtual void sleep(size_t time) = 0;
+
+
 	/**
 	 * @brief This function is called when timer interrupt occurs.
 	 * 		  It shall be called from the layer that directly receives

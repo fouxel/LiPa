@@ -16,6 +16,9 @@
  */
 
 #include "uartcontroller.h"
+#include "uartnormalizer.h"
+#include "qlearningmodel.h"
+#include "types.h"
 
 #include <errno.h>
 #include <fcntl.h> 
@@ -90,6 +93,8 @@ UartController::~UartController()
 }
 
 int UartController::run(int argc, char **argv) {
+    UartNormalizer norm;
+    ai::QLearningModel model(norm);
     char *portname = "/dev/ttyACM0";
     int fd;
     int wlen;
@@ -103,54 +108,48 @@ int UartController::run(int argc, char **argv) {
     set_interface_attribs(fd, B115200);
     set_mincount(fd, 0);                /* set to pure timed read */
 
-    /* simple output */
-   // wlen = write(fd, "Hello!\n", 7);
-   // if (wlen != 7) {
-    //    printf("Error from write: %d, %d\n", wlen, errno);
-    //}
-    //tcdrain(fd);    /* delay for output */
-
-    bool startSequenceEnd = false;
     int rdlen;
     unsigned char buf;
-    do {
-        rdlen = read(fd, &buf, sizeof(buf));
-        if (rdlen > 0) {
-            if (buf != 1) {
-              continue;
-            }
+
+    constexpr auto distCount = 3;
+    while (1) {
+        distvec dist;
+        dist.reserve(distCount);
+        for (int i = 0; i < distCount; ++i) {
+          while(true) {
             rdlen = read(fd, &buf, sizeof(buf));
             if (rdlen > 0) {
-              if (buf == 2) {
-                startSequenceEnd = true;
+              std::cout << "rdlen: " << rdlen << std::endl;
+              dist.push_back(buf);
+              wlen = write(fd, &buf, sizeof(buf));
+              if (wlen != 1) {
+                  std::cout << "cannot send ACK" << std::endl;
               }
+              break;
+            } else {
+              std::cout << "wrong rdlen: " << rdlen << std::endl;
+             // dist.push_back(1);
             }
-        } else if (rdlen < 0) {
-            printf("Error from read: %d: %s\n", rdlen, strerror(errno));
-        }
-    } while (!startSequenceEnd);
-    
-    while (1) {
-        unsigned char dist[2];
-        for (int i = 0; i < 2; ++i) {
-          rdlen = read(fd, &buf, sizeof(buf));
-          if (rdlen > 0) {
-            dist[i] = buf;
-          } else {
-            abort();
           }
         }
-        for(int i = 0; i < 2; ++i) {
+        for(int i = 0; i < dist.size(); ++i) {
           std::cout << "dist[" << i << "]: " << (int)dist[i] << std::endl;
         }
-        uint8_t action = 2; //TODO: Get real action.
+        sleep(1);
+        auto action = model.getAction(dist); //TODO: Get real action.
+        if (ai::IModel::Action::ACTION_TERMINATE == action) {
+          int sleepCount = 30;
+          while(sleepCount --> 0) {
+            sleep(1);
+            std::cout << "Seconds remaining: " << sleepCount << std::endl;
+          }
+        }
         wlen = write(fd, &action, sizeof(action));
         if (wlen != sizeof(action)) {
+          std::cout << "wrong wlen: " << wlen << std::endl;
           abort();
         }
         tcdrain(fd);
-        read(fd, &buf, sizeof(buf));
-        read(fd, &buf, sizeof(buf));
     }
  
     return 0;

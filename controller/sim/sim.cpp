@@ -4,6 +4,7 @@
 
 #include "line.h"
 #include "qlearningmodel.h"
+#include "normalizer.h"
 #include "world.h"
 #include <math.h>
 
@@ -19,7 +20,9 @@ int Sim::run(int argc, char **argv) {
   //! [2]
 
   //! [3]
-  ai::QLearningModel model;
+  
+  Normalizer norm;
+  ai::QLearningModel model(norm);
   auto world = new sim::World();
   world->setPos(20, 150);
 

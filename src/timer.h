@@ -20,6 +20,9 @@ public:
 	size_t end() override;
 	void interrupt() override;
 
+	void sleep() override;
+	void sleep(size_t time) override;
+
 private:
 	volatile size_t m_count;
 	volatile bool m_enabled;

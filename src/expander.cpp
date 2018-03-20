@@ -74,7 +74,7 @@ void Expander::resetPin(pin_t pin) {
 	writeReg(MCP_OLAT, m_pin);
 }
 
-bool Expander::readPin(pin_t pin) { return (readReg(MCP_GPIO) & pin); }
+bool Expander::readPin(pin_t pin) { return (readReg(MCP_GPIO) & (1 << pin)); }
 
 void Expander::writeReg(uint8_t addr, uint8_t value) {
   gpioCS.reset();

@@ -9,11 +9,11 @@
 #include <iostream>
 
 #include "statecoder.h"
-#include "normalizer.h"
 
 using namespace ai;
 
-QLearningModel::QLearningModel() {
+QLearningModel::QLearningModel(INormalizer &normalizer):
+m_normalizer(normalizer) {
   m_solver.reset(new AIToolbox::MDP::QLearning(STATES_COUNT, ACTIONS_COUNT));
   std::srand(std::time(nullptr));
 }
@@ -23,7 +23,11 @@ QLearningModel::~QLearningModel() {}
 float QLearningModel::getDiffReward(cdistvec &distances) const {
   int sum = 0;
 
-  std::vector<int> diffs(5);
+  std::vector<int> diffs;
+  diffs.reserve(5);
+  std::cout << "distances.size() " << distances.size() << std::endl;
+  assert(distances.size() == 5);
+  assert(m_prevDistances.size() == 5);
   std::transform(m_prevDistances.begin(), m_prevDistances.end(),
                  distances.begin(), diffs.begin(), std::minus<int>());
 
@@ -59,7 +63,7 @@ bool QLearningModel::isOppositeToPrevAction(Action currAction) const {
 
 std::size_t
 QLearningModel::encodeState(cdistvec &distances) const {
-  std::vector<int> normalizedDistances = Normalizer::normalize(distances); 
+  std::vector<int> normalizedDistances = m_normalizer.normalize(distances); 
   return StateCoder::encode(normalizedDistances, 5);
 }
 
