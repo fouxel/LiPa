@@ -7,4 +7,4 @@ add_subdirectory(dl)
 add_subdirectory(controller)
 add_executable(main main.cpp)
 
-target_link_libraries(main sim uart_controller ai-model libAIToolboxMDP.a)
+target_link_libraries(main sim_controller uart_controller ai_model libAIToolboxMDP.a)

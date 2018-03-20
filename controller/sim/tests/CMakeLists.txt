@@ -7,7 +7,7 @@ add_executable(sim_tests
   normalizer_tests.cpp
   main.cpp)
 
-target_link_libraries(sim_tests ${GTEST_LIBRARIES} pthread sim)
+target_link_libraries(sim_tests ${GTEST_LIBRARIES} pthread sim_controller)
 
 add_test(NAME SIM_TESTS
          COMMAND ./sim_tests

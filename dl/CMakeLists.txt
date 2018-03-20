@@ -1,10 +1,10 @@
 cmake_minimum_required (VERSION 3.0)
-project(ai-lipamodel)
+project(ai_model)
 
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
-add_library(ai-model STATIC
+add_library(ai_model STATIC
       imodel.h
       types.h
       qlearningmodel.h
