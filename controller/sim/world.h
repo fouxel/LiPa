@@ -26,6 +26,9 @@ protected:
 
 private:
      std::vector<std::unique_ptr<QPainterPath> > m_paths;
+     
+     QPainterPath m_circle;
+     int moveX;
 };
 
 }
