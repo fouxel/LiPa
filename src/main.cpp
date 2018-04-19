@@ -15,13 +15,6 @@
 #include "timer.h"
 #include "sensor.h"
 
-// Sample pragmas to cope with warnings. Please note the related line at
-// the end of this function, used to pop the compiler diagnostics status.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wmissing-declarations"
-#pragma GCC diagnostic ignored "-Wreturn-type"
-
 std::unique_ptr<Timer> _timer;
 
 extern "C" {
@@ -33,17 +26,16 @@ void TIM2_IRQHandler() {
 }
 }
 
-void leftForward() {
+void leftForward(uint16_t pulse) {
   TIM_OCInitTypeDef channel;
 
   TIM_OCStructInit(&channel);
   channel.TIM_OCMode = TIM_OCMode_PWM1;
   channel.TIM_OutputState = TIM_OutputState_Enable;
-  channel.TIM_Pulse = 1000;
+  channel.TIM_Pulse = pulse;
   TIM_OC1Init(TIM4, &channel);
 }
 
-void leftReverse();
 void leftStop() {
   TIM_OCInitTypeDef channel;
 
@@ -54,17 +46,15 @@ void leftStop() {
   TIM_OC1Init(TIM4, &channel);
 }
 
-void rightForward() {
+void rightForward(uint16_t pulse) {
   TIM_OCInitTypeDef channel;
 
   TIM_OCStructInit(&channel);
   channel.TIM_OCMode = TIM_OCMode_PWM1;
   channel.TIM_OutputState = TIM_OutputState_Enable;
-  channel.TIM_Pulse = 1000;
+  channel.TIM_Pulse = pulse;
   TIM_OC2Init(TIM4, &channel);
 }
-
-void rightReverse();
 
 void rightStop() {
   TIM_OCInitTypeDef channel;
@@ -178,26 +168,27 @@ int main(void) {
   leftStop();
   rightStop();
   while (1) {
-    for(auto &sensor : sensors) {
-    	auto i = sensor.getDistance();
+	for (int i = 0; i < 3; ++i) {
+		for (auto &sensor : sensors) {
+			auto i = sensor.getDistance();
 
-        i /= 4;
-        if (i > 0xFF) {
-        	i = 0xFF;
-        }
-        trace_printf("distance send: %d\n", i);
-        send_char(i);
-        _timer->sleep();
-        auto ack = read_char();
-        if (ack != i) {
-        	trace_printf("wrong ack! %d\n", ack);
-        }
-    }
+			i /= 4;
+			if (i > 0xFF) {
+				i = 0xFF;
+			}
+			trace_printf("distance send: %d\n", i);
+			send_char(i);
+			_timer->sleep();
+			auto ack = read_char();
+			if (ack != i) {
+				trace_printf("wrong ack! %d\n", ack);
+			}
+		}
     trace_printf("###########\n");
     _timer->sleep();
+	}
 
     auto action = read_char();
-    action = 0;
     trace_printf("action: %d\n", action);
 
     /*
@@ -208,37 +199,24 @@ int main(void) {
      * */
 
     if (action == 0) {
-    	leftForward();
-    	rightForward();
+    	leftForward(1420);
+    	rightForward(1380);
     } else if (action == 1) {
-    	leftForward();
+    	leftForward(1250);
     	rightStop();
     } else if (action == 2) {
-    	rightForward();
+    	rightForward(1250);
     	leftStop();
     } else {
     	rightStop();
     	leftStop();
     }
 
-    _timer->sleep(800000);
+    if (action == 0) {
+    	_timer->sleep(150000);
+    }
+    _timer->sleep(150000);
     rightStop();
     leftStop();
-    //send_char(3);
-    //send_char(4); //end of transmission
-    //TODO: Read action
-
-    //send_char(i);
-    //if (i < 400) {
-    //  leftStop();
-    //  rightStop();
-    //} else {
-    //  leftForward();
-    //  rightForward();
-    //}
   }
 }
-
-#pragma GCC diagnostic pop
-
-// ----------------------------------------------------------------------------

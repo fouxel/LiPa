@@ -15,7 +15,7 @@ Sim::Sim() {}
 int Sim::run(int argc, char **argv) {
   QApplication app(argc, argv);
   QGraphicsScene scene;
-  scene.setSceneRect(0, 0, 300, 300);
+  scene.setSceneRect(0, -100, 600, 600);
   scene.setItemIndexMethod(QGraphicsScene::NoIndex);
   //! [2]
 
@@ -44,7 +44,7 @@ int Sim::run(int argc, char **argv) {
   view.setDragMode(QGraphicsView::ScrollHandDrag);
   //! [5] //! [6]
   view.setWindowTitle(QT_TRANSLATE_NOOP(QGraphicsView, "Colliding Mice"));
-  view.resize(400, 300);
+  view.resize(800, 800);
   view.show();
 
   QTimer timer;
