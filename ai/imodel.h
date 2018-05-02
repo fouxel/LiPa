@@ -10,7 +10,7 @@ class IModel
 {
 public:
     enum Action {
-        ACTION_FORWARD, // Move forward.
+        ACTION_FORWARD = 0, // Move forward.
         ACTION_LEFT, // Turn left.
         ACTION_RIGHT, // Turn right.
         ACTION_TERMINATE // Agent reached critical state. It is usually not possible
