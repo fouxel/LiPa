@@ -8,8 +8,6 @@
 #include "sensor.h"
 #include "stm32f10x.h"
 
-//	GPIO(uint16_t pin, GPIO_TypeDef* gpiox, GPIOMode_TypeDef mode, GPIOSpeed_TypeDef speed = GPIO_Speed_50MHz);
-
 Sensor::Sensor(ITimer &timer, Port& echo, Port& trig):
 m_timer(timer),
 m_echo(echo),

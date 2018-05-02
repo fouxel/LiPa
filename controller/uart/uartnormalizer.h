@@ -26,6 +26,9 @@ public:
     UartNormalizer();
 
     distvec normalize(cdistvec &distances) override;
+    
+    size_t maxValue() override;
+
 };
 
 #endif // UARTNORMALIZER_H

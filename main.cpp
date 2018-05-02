@@ -8,5 +8,5 @@ INITIALIZE_EASYLOGGINGPP
 int main(int argc, char **argv) {
   UartController uart;
   sim::Sim sim;
-  return sim.run(argc, argv);
+  return uart.run(argc, argv);
 }

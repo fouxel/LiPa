@@ -126,11 +126,20 @@ int main(void) {
   ExpanderPort expPortTrig3(expander, 4);
   ExpanderPort expPortEcho3(expander, 5);
 
+  GPIO portEcho(GPIO_Pin_0, GPIOA, GPIO_Mode_IN_FLOATING);
+  GPIO portTrig(GPIO_Pin_1, GPIOA, GPIO_Mode_Out_PP);
+
+  GPIO portEcho2(GPIO_Pin_2, GPIOC, GPIO_Mode_IN_FLOATING);
+  GPIO portTrig2(GPIO_Pin_3, GPIOC, GPIO_Mode_Out_PP);
+
+  GPIO portEcho3(GPIO_Pin_10, GPIOC, GPIO_Mode_IN_FLOATING);
+  GPIO portTrig3(GPIO_Pin_11, GPIOC, GPIO_Mode_Out_PP);
+
   constexpr auto SENSOR_COUNT = 3;
   _timer.reset(new Timer());
-  std::array<Sensor, SENSOR_COUNT> sensors = { Sensor(*(_timer.get()), expPortEcho, expPortTrig),
-		  	  	  	  	  	  	   	   	   	   Sensor(*(_timer.get()), expPortEcho2, expPortTrig2),
-											   Sensor(*(_timer.get()), expPortEcho3, expPortTrig3)};
+  std::array<Sensor, SENSOR_COUNT> sensors = { Sensor(*(_timer.get()), portEcho, portTrig),
+		  	  	  	  	  	  	   	   	   	   Sensor(*(_timer.get()), portEcho2, portTrig2),
+											   Sensor(*(_timer.get()), portEcho3, portTrig3)};
 
   // Ustawienia silników PC6, PC7
   gpio.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
@@ -170,17 +179,18 @@ int main(void) {
   while (1) {
 	for (int i = 0; i < 3; ++i) {
 		for (auto &sensor : sensors) {
-			auto i = sensor.getDistance();
-
-			i /= 4;
-			if (i > 0xFF) {
-				i = 0xFF;
+			auto dist = sensor.getDistance();
+			trace_printf("distance original: %d\n", dist);
+			dist /= 2;
+			if (dist > 200) {
+				dist = 200;
 			}
-			trace_printf("distance send: %d\n", i);
-			send_char(i);
-			_timer->sleep();
+			trace_printf("distance send: %d\n", dist);
+			send_char(dist);
+	    	_timer->sleep(1500);
+
 			auto ack = read_char();
-			if (ack != i) {
+			if (ack != dist) {
 				trace_printf("wrong ack! %d\n", ack);
 			}
 		}
@@ -188,7 +198,7 @@ int main(void) {
     _timer->sleep();
 	}
 
-    auto action = read_char();
+	auto action = read_char();
     trace_printf("action: %d\n", action);
 
     /*

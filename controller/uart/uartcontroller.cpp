@@ -119,7 +119,7 @@ int UartController::run(int argc, char **argv) {
           while(true) {
             rdlen = read(fd, &buf, sizeof(buf));
             if (rdlen > 0) {
-              std::cout << "rdlen: " << rdlen << std::endl;
+              //std::cout << "rdlen: " << rdlen << std::endl;
               dist.push_back(buf);
               wlen = write(fd, &buf, sizeof(buf));
               if (wlen != 1) {
@@ -132,10 +132,10 @@ int UartController::run(int argc, char **argv) {
             }
           }
         }
-        for(int i = 0; i < dist.size(); ++i) {
-          std::cout << "dist[" << i << "]: " << (int)dist[i] << std::endl;
-        }
-        sleep(1);
+       // for(int i = 0; i < dist.size(); ++i) {
+       //   std::cout << "dist[" << i << "]: " << (int)dist[i] << std::endl;
+       // }
+       sleep(1);
         distvec distAvg;
         distAvg.reserve(3);
         distAvg.push_back((dist[0] + dist[3] + dist[6]) / 3);
@@ -144,14 +144,16 @@ int UartController::run(int argc, char **argv) {
         for(auto d : distAvg) {
           std::cout << "AVGD: " << d << std::endl;
         }
-        auto action = model.getAction(distAvg); //TODO: Get real action.
+        auto action = model.getAction(distAvg);
         if (ai::IModel::Action::ACTION_TERMINATE == action) {
-          int sleepCount = 10;
+          system("beep");
+          int sleepCount = 6;
           while(sleepCount --> 0) {
             sleep(1);
             std::cout << "Seconds remaining: " << sleepCount << std::endl;
           }
         }
+        uint8_t uaction = (uint8_t) action;
         wlen = write(fd, &action, sizeof(action));
         if (wlen != sizeof(action)) {
           std::cout << "wrong wlen: " << wlen << std::endl;
