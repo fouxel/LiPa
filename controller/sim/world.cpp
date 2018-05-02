@@ -8,16 +8,19 @@
 using namespace sim;
 
 World::World() {
-  QPainterPath *path = new QPainterPath;
-  path->addRect(-100, -300, 50, 500);
-  path->addRect(-100, 200, 700, 50);
-  path->addRect(-50, -300, 650, 50);
-  path->addRect(550, -250, 50, 450);
-  std::unique_ptr<QPainterPath> tmp(path);
-  m_paths.emplace_back(std::move(tmp));
-  
+  QPainterPath path;
+  path.addRect(-100, -300, 50, 500);
+  path.addRect(-100, 200, 700, 50);
+  path.addRect(-50, -300, 650, 50);
+  path.addRect(550, -250, 50, 450);
+
+  m_paths.push_back(path);
+
+  QPainterPath circle;
+  circle.addEllipse(300,-100, 50, 50);
+  m_paths.emplace_back(circle);
+
   moveX = 10;
-  m_circle.addEllipse(10, 0, 50, 50);
 }
 
 QRectF World::boundingRect() const {
@@ -35,16 +38,16 @@ void World::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
                   QWidget *) {
   painter->setBrush(QColor(100, 100, 100));
 
-  QPainterPath &p = *(m_paths[0]);
+  QPainterPath &p = m_paths[0];
   painter->drawPath(p);
-  painter->drawPath(m_circle);
+  painter->drawPath(m_paths[1]);
 
-  auto pos = m_circle.currentPosition();
+  auto pos = m_paths[1].currentPosition();
   printf("X: %d\n", (int) pos.x());
   printf("Y: %d\n", (int) pos.y());
-  if (pos.x() > 230) {
+  if (pos.x() > 500) {
     moveX = -10;
-  } if (pos.x() < 0) {
+  } if (pos.x() < 300) {
     moveX = +10;
   }
   scene()->update();
@@ -53,16 +56,12 @@ void World::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 void World::advance(int step) {
   if (!step)
     return;
-  printf("advance");
-  m_circle.translate(moveX, 0);
+  m_paths[1].translate(moveX, 0);
 
 }
 
-const std::vector<std::reference_wrapper<QPainterPath>>
+const std::vector<std::reference_wrapper<const QPainterPath>>
 World::getPaths() const {
-  std::vector<std::reference_wrapper<QPainterPath>> vec;
-  for (auto &path : m_paths) {
-    vec.push_back(*path);
-  }
+  std::vector<std::reference_wrapper<const QPainterPath>> vec = {m_paths.begin(), m_paths.end()};
   return vec;
 }

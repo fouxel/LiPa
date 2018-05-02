@@ -15,6 +15,8 @@ add_library(sim_controller STATIC
 	    world.cpp
 	    normalizer.cpp
 	    normalizer.h
+	    counter.cpp
+	    counter.h
 )
 
 target_link_libraries(sim_controller Qt5::Widgets)

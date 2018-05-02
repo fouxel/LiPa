@@ -19,15 +19,13 @@ public:
     QPainterPath shape() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                QWidget *widget) override;
-    const std::vector<std::reference_wrapper<QPainterPath> > getPaths() const;
+    const std::vector<std::reference_wrapper<const QPainterPath> > getPaths() const;
 
 protected:
     void advance(int step) override;
 
 private:
-     std::vector<std::unique_ptr<QPainterPath> > m_paths;
-     
-     QPainterPath m_circle;
+     std::vector<QPainterPath> m_paths;
      int moveX;
 };
 

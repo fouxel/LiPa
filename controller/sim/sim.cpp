@@ -3,6 +3,7 @@
 #include <QtWidgets>
 
 #include "line.h"
+#include "counter.h"
 #include "qlearningmodel.h"
 #include "normalizer.h"
 #include "world.h"
@@ -26,10 +27,14 @@ int Sim::run(int argc, char **argv) {
   auto world = new sim::World();
   world->setPos(20, 150);
 
-  auto *line = new sim::Line(world->getPaths(), world, model);
+  auto line = new sim::Line(world->getPaths(), world, model);
   line->setPos(150, 150);
   scene.addItem(line);
   scene.addItem(world);
+  
+  auto counter = new sim::Counter(line);
+  counter->setPos(20, 20);
+  scene.addItem(counter);
 
   //! [3]
 

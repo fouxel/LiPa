@@ -15,3 +15,7 @@ distvec Normalizer::normalize(cdistvec &distances) {
                  [](int distance) -> int { return (distance / 10); });
   return normalizedDistances;
 }
+
+size_t Normalizer::maxValue() {
+  return 5;
+}

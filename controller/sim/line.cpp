@@ -11,9 +11,9 @@
 
 using namespace sim;
 
-Line::Line(const std::vector<std::reference_wrapper<QPainterPath>> paths,
+Line::Line(const std::vector<std::reference_wrapper<const QPainterPath>> paths,
            QGraphicsItem *world, ai::IModel &model)
-    : m_paths(paths), m_world(world), m_model(model) {
+    : m_paths(paths), m_world(world), m_model(model), m_terminalStateCount(0) {
   for (auto i = 0; i < 5; ++i) {
     QLineF line;
     line.setP1(QPointF(-1, -1));
@@ -39,35 +39,39 @@ void Line::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
   for (auto &line : m_lines) {
     painter->drawLine(line);
   }
+  
 }
 
 void Line::advance(int step) {
   if (!step)
     return;
-  std::vector<int> distances;
+  std::vector<int> distances = {49, 49, 49, 49, 49};
+  int count = 0;
   for (auto &line : m_lines) {
     int length = 50;
-    bool enough = false;
-    while (length-- > 0) {
+    bool found = false;
+     while (length-- > 0) {
+      int freePathsCount = 0;
       line.setLength(length);
-
       for (const auto &path : m_paths) {
         if (path.get().contains(mapToItem(m_world, line.pointAt(1)))) {
-
         } else {
-          enough = true;
-          break;
+          freePathsCount++;
         }
       }
-      if (enough == true) {
-        distances.push_back(length);
+      if (freePathsCount == m_paths.size()) {
+        if (distances[count] > length) {
+            distances[count] = length;
+        }
+        found = true;
         break;
       }
     }
-    if (enough == false) {
-      distances.push_back(1);
+    if (found == false) {
+      distances[count] = 1;
       
     }
+    count++;
   }
   auto rot = rotation();
   auto action = m_model.getAction(distances);
@@ -86,6 +90,11 @@ void Line::advance(int step) {
   case ai::IModel::ACTION_TERMINATE:
     setRotation(0);
     setPos(150, 150);
+    m_terminalStateCount++;
     break;
   }
+}
+
+int Line::getTerminalStateCount() {
+    return m_terminalStateCount;
 }
