@@ -24,6 +24,10 @@ distvec UartNormalizer::normalize(cdistvec& distances) {
   distvec normalizedDistances(distances.size());
   std::transform(distances.begin(), distances.end(),
                  normalizedDistances.begin(),
-                 [](int distance) -> int { return (distance / 50); });
+                 [](int distance) -> int { return (distance / 20); });
   return normalizedDistances;
+}
+
+size_t UartNormalizer::maxValue() {
+  return 10;
 }
