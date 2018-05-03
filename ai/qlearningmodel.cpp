@@ -27,7 +27,7 @@ QLearningModel::~QLearningModel() {}
 float QLearningModel::getDiffReward(cdistvec &distances) const {
   int sum = 0;
 
-  std::vector<int> diffs(5);
+  std::vector<int> diffs(distances.size());
   assert(distances.size() == m_prevDistances.size());
   std::transform(m_prevDistances.begin(), m_prevDistances.end(),
                  distances.begin(), diffs.begin(), std::minus<int>());
