@@ -29,7 +29,7 @@ private:
 
     Action m_prevAction;
     distvec m_prevDistances;
-    constexpr static int STATES_COUNT = 1331;
+    constexpr static int STATES_COUNT = 10000;
     constexpr static int ACTIONS_COUNT = 3;
     std::unique_ptr<AIToolbox::MDP::QLearning> m_solver;
     

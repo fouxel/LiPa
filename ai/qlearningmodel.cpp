@@ -27,7 +27,7 @@ QLearningModel::~QLearningModel() {}
 float QLearningModel::getDiffReward(cdistvec &distances) const {
   int sum = 0;
 
-  std::vector<int> diffs(distances.size());
+  std::vector<int> diffs(5);
   assert(distances.size() == m_prevDistances.size());
   std::transform(m_prevDistances.begin(), m_prevDistances.end(),
                  distances.begin(), diffs.begin(), std::minus<int>());
@@ -48,7 +48,7 @@ float QLearningModel::getDiffReward(cdistvec &distances) const {
 bool QLearningModel::isTerminalState(cdistvec &distances) const {
   // TODO: Check why it fails if dist < 10;
   auto iter = std::find_if(distances.begin(), distances.end(),
-                           [](int dist) -> bool { return dist <= 60; });
+                           [](int dist) -> bool { return dist <= 20; });
   if (iter == distances.end()) {
     return false;
   }
@@ -81,43 +81,24 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
   if (isTerminalState(distances)) {
     std::cout << "Terminal state" << std::endl;
     m_solver->stepUpdateQ(encodeState(m_prevDistances), m_prevAction,
-                          encodeState(distances), -100000);
+                          encodeState(distances), -1000);
     m_prevDistances.clear();
     m_count++;
+
+    std::ofstream file;
+    file.open("logi", std::ios_base::app);
+    file << "############# QFUNCTION" << std::endl;
+    file << m_count << std::endl;
+    file << m_solver->getQFunction() << std::endl;
+    file.close();
     return ACTION_TERMINATE;
   }
-
-  // Pick current action
-  std::ofstream file;
-  file.open("logi", std::ios_base::app);
-  file << "############# QFUNCTION" << std::endl;
-  file << m_count << std::endl;
-  file << m_solver->getQFunction() << std::endl;
-  file.close();
-
   
   AIToolbox::MDP::QGreedyPolicy policy(m_solver->getQFunction());
-  Action action;
-  if(encodeState(distances) == 1330) {
-    action = ACTION_FORWARD;
-    std::cout << "#### FORWARD ACTION" << std::endl;
-  } else {
-    if (m_count % 5 == 0) {
-      std::cout << "#### POLICY ACTION" << std::endl;
-      action = static_cast<Action>(policy.sampleAction(encodeState(distances)));
-    } else {
-      std::cout << "#### RANDOM ACTION" << std::endl;
-      int r = rand() % 3;
-      if (r == 0) {
-        action = ACTION_LEFT;
-      } else if (r == 1) {
-        action = ACTION_RIGHT;
-      } else {
-        action = ACTION_FORWARD;
-      }
-    }
-  }
+  Action action = static_cast<Action>(policy.sampleAction(encodeState(distances)));
+
   std::cout << "Action: " << action << std::endl;
+  std::cout << "State: " << encodeState(distances) << std::endl;
   float diffReward = getDiffReward(distances);
   float oppositeReward = 0;
   if (isOppositeToPrevAction(action)) {
@@ -125,13 +106,13 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
   }
 
   float actionReward = 0;
-  switch (action) {
+  switch (m_prevAction) {
   case ACTION_FORWARD:
     actionReward = 0.2;
     break;
   case ACTION_LEFT:
   case ACTION_RIGHT:
-    actionReward = -0.1;
+    actionReward = -0.8;
     break;
   default:
     std::cout << "Bad action" << std::endl;
@@ -153,53 +134,3 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
 }
 
 bool QLearningModel::isInitialState() const { return !m_prevDistances.size(); }
-
-// https://stackoverflow.com/questions/13728430/element-wise-multiplication-of-two-vectors-in-c
-// Określanie reworda. Algorytm działa następująco
-/*
-function [reward, terminal] = getReward(action, prev_action, sensor1, sensor2,
-krasj)
-
-    % Reward function for Q-learning with table
-
-    r1 = 0;
-    r2 = 0;
-    r3 = 0;
-    reward = 0;
-
-    status_krasj = ~isempty(find(krasj(2),1));
-    terminal = false;
-    a = action;
-
-    switch(a)
-
-        case 1, r1 = 0.2;
-        case 2, r1 = -0.1;
-        case 3, r1 = -0.1;
-
-    end
-
-    if (sum(sensor2 - sensor1) >= 0)
-
-        r2 = 0.2;
-    else
-
-        r2 = -0.2;
-    end
-
-   if(prev_action == 2 && a == 3)
-
-       r3 =  -0.8;
-   elseif(prev_action == 3 && a == 2)
-
-       r3 = -0.8;
-   end
-
-   reward = r1 + r2 + r3;
-
-   if(status_krasj)
-
-       terminal = true;
-       reward = -100;
-   end
-*/

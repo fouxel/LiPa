@@ -33,7 +33,7 @@ int Sim::run(int argc, char **argv) {
   scene.addItem(world);
   
   auto counter = new sim::Counter(line);
-  counter->setPos(20, 20);
+  counter->setPos(550, 00);
   scene.addItem(counter);
 
   //! [3]

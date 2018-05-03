@@ -38,13 +38,10 @@ void World::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
                   QWidget *) {
   painter->setBrush(QColor(100, 100, 100));
 
-  QPainterPath &p = m_paths[0];
-  painter->drawPath(p);
+  painter->drawPath(m_paths[0]);
   painter->drawPath(m_paths[1]);
 
   auto pos = m_paths[1].currentPosition();
-  printf("X: %d\n", (int) pos.x());
-  printf("Y: %d\n", (int) pos.y());
   if (pos.x() > 500) {
     moveX = -10;
   } if (pos.x() < 300) {

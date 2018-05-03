@@ -24,12 +24,12 @@ Line::Line(const std::vector<std::reference_wrapper<const QPainterPath>> paths,
 
 QRectF Line::boundingRect() const {
   qreal adjust = 0.5;
-  return QRectF(-50 - adjust, -50 - adjust, 100 + adjust, 50 + adjust);
+  return QRectF(-100 - adjust, -100 - adjust, 200 + adjust, 100 + adjust);
 }
 
 QPainterPath Line::shape() const {
   QPainterPath path;
-  path.addRect(-70, -70, 140, 140);
+  path.addRect(-100, -100, 200, 200);
   return path;
 }
 
@@ -45,10 +45,10 @@ void Line::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 void Line::advance(int step) {
   if (!step)
     return;
-  std::vector<int> distances = {49, 49, 49, 49, 49};
+  std::vector<int> distances = {69, 69, 69, 69, 69};
   int count = 0;
   for (auto &line : m_lines) {
-    int length = 50;
+    int length = 70;
     bool found = false;
      while (length-- > 0) {
       int freePathsCount = 0;
@@ -73,6 +73,9 @@ void Line::advance(int step) {
     }
     count++;
   }
+  for (auto &dist : distances) {
+      std::cout << "dist: " << dist << std::endl;
+  }
   auto rot = rotation();
   auto action = m_model.getAction(distances);
   switch (action) {
@@ -80,11 +83,11 @@ void Line::advance(int step) {
     setPos(mapToParent(0, -10.f));
     break;
   case ai::IModel::ACTION_LEFT:
-    setRotation(rot+60);
+    setRotation(rot+30);
     setPos(mapToParent(0, -10.f));
     break;
   case ai::IModel::ACTION_RIGHT:
-    setRotation(rot-60);
+    setRotation(rot-30);
     setPos(mapToParent(0, -10.f));
     break;
   case ai::IModel::ACTION_TERMINATE:
