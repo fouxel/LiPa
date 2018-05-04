@@ -18,7 +18,7 @@ using namespace ai;
 QLearningModel::QLearningModel(INormalizer &normalizer):
 m_normalizer(normalizer),
 m_count(0) {
-  m_solver.reset(new AIToolbox::MDP::QLearning(STATES_COUNT, ACTIONS_COUNT, 1.0, 0.5));
+  m_solver.reset(new AIToolbox::MDP::QLearning(STATES_COUNT, ACTIONS_COUNT, 1.0, 0.1));
   std::srand(std::time(nullptr));
 }
 

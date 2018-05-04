@@ -92,7 +92,7 @@ void Line::advance(int step) {
     break;
   case ai::IModel::ACTION_TERMINATE:
     setRotation(0);
-    setPos(150, 150);
+    setPos(250, 150);
     m_terminalStateCount++;
     break;
   }
