@@ -1,6 +1,7 @@
 #include "qlearningmodel.h"
 #include <AIToolbox/MDP/Algorithms/QLearning.hpp>
 #include <AIToolbox/MDP/Policies/QGreedyPolicy.hpp>
+#include <AIToolbox/MDP/Policies/QSoftmaxPolicy.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -18,7 +19,7 @@ using namespace ai;
 QLearningModel::QLearningModel(INormalizer &normalizer):
 m_normalizer(normalizer),
 m_count(0) {
-  m_solver.reset(new AIToolbox::MDP::QLearning(STATES_COUNT, ACTIONS_COUNT, 1.0, 0.1));
+  m_solver.reset(new AIToolbox::MDP::QLearning(STATES_COUNT, ACTIONS_COUNT, 1.0, 0.5));
   std::srand(std::time(nullptr));
 }
 
@@ -29,8 +30,8 @@ float QLearningModel::getDiffReward(cdistvec &distances) const {
 
   std::vector<int> diffs(distances.size());
   assert(distances.size() == m_prevDistances.size());
-  std::transform(m_prevDistances.begin(), m_prevDistances.end(),
-                 distances.begin(), diffs.begin(), std::minus<int>());
+  std::transform(distances.begin(), distances.end(),
+                 m_prevDistances.begin(), diffs.begin(), std::minus<int>());
 
   std::cout << "diff size: " << diffs.size() << std::endl;
   for (const auto &diff : diffs) {
@@ -38,9 +39,9 @@ float QLearningModel::getDiffReward(cdistvec &distances) const {
     sum += diff;
   }
 
-  float reward = -0.2;
+  float reward = -0.3;
   if (sum >= 0) {
-    reward = 0.2;
+    reward = 0.3;
   }
   return reward;
 }
@@ -66,7 +67,7 @@ bool QLearningModel::isOppositeToPrevAction(Action currAction) const {
 
 std::size_t
 QLearningModel::encodeState(cdistvec &distances) const {
-  std::vector<int> normalizedDistances = m_normalizer.normalize(distances); 
+  std::vector<int> normalizedDistances = m_normalizer.normalize(distances);
   return StateCoder::encode(normalizedDistances, m_normalizer.maxValue());
 }
 
@@ -93,10 +94,22 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
     file.close();
     return ACTION_TERMINATE;
   }
-  
-  AIToolbox::MDP::QGreedyPolicy policy(m_solver->getQFunction());
-  Action action = static_cast<Action>(policy.sampleAction(encodeState(distances)));
 
+  double temp = 0;
+  if (m_count < 20) {
+    temp = 10;
+  } else if (m_count < 60) {
+    temp = 3;
+  }
+  AIToolbox::MDP::QSoftmaxPolicy policy(m_solver->getQFunction(), 1);
+  
+  //AIToolbox::MDP::QGreedyPolicy policy(m_solver->getQFunction());
+  Action action;
+  if (encodeState(distances) == 6220) {
+    action = ACTION_FORWARD;
+  } else {
+    action = static_cast<Action>(policy.sampleAction(encodeState(distances)));
+  }
   std::cout << "Action: " << action << std::endl;
   std::cout << "State: " << encodeState(distances) << std::endl;
   float diffReward = getDiffReward(distances);
@@ -112,14 +125,14 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
     break;
   case ACTION_LEFT:
   case ACTION_RIGHT:
-    actionReward = -0.8;
+    actionReward = -0.1;
     break;
   default:
     std::cout << "Bad action" << std::endl;
     break;
   }
 
-  float totalReward = actionReward + diffReward + oppositeReward;
+  float totalReward = actionReward  + diffReward + oppositeReward;
   std::cout <<"Action Reward: " << actionReward << std::endl;
   std::cout <<"Diff Reward: " << diffReward << std::endl;
   std::cout <<"Opposite Reward: " << oppositeReward << std::endl;

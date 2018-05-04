@@ -26,7 +26,8 @@ protected:
 
 private:
      std::vector<QPainterPath> m_paths;
-     int moveX;
+     int moveXCircle;
+     int moveYRect;
 };
 
 }

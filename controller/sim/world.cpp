@@ -4,11 +4,13 @@
 #include <QPainter>
 #include <QStyleOption>
 #include <qmath.h>
+#include <iostream>
 
 using namespace sim;
 
 //#define RECT 1
 #define CIRCLE 1
+//#define ANIM 1
 
 World::World() {
   QPainterPath path;
@@ -20,25 +22,30 @@ World::World() {
 #ifdef RECT
   path.addRect(100, 100, 100, 100);
 
-  path.addRect(0, -100, 100, 100);
+  path.addRect(0, -200, 100, 100);
 
-  path.addRect(400, 00, 100, 100);
+  path.addRect(350, 00, 100, 100);
 #endif
 
 #ifdef CIRCLE
   path.addEllipse(100, 50, 100, 100);
   path.addEllipse(0, -100, 100, 100);
   path.addEllipse(400, 00, 100, 100);
-  path.addEllipse(450, -300, 100, 100);
+  path.addEllipse(450, -250, 100, 100);
 #endif
 
   m_paths.push_back(path);
 
 #ifdef ANIM
   QPainterPath circle;
-  circle.addEllipse(300,-100, 50, 50);
+  circle.addEllipse(300,-100, 70, 70);
   m_paths.emplace_back(circle);
-  moveX = 10;
+  moveXCircle = 5;
+  
+  QPainterPath rect;
+  rect.addRect(0, 0, 100, 100);
+  m_paths.emplace_back(rect);
+  moveYRect = 5;
 #endif
 }
 
@@ -64,9 +71,17 @@ void World::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
 #ifdef ANIM
   auto pos = m_paths[1].currentPosition();
   if (pos.x() > 500) {
-    moveX = -10;
+    moveXCircle = -5;
   } if (pos.x() < 300) {
-    moveX = +10;
+    moveXCircle = +5;
+  }
+  
+  pos = m_paths[2].currentPosition();
+  std::cout << "pos.y " << pos.y() << std::endl;
+  if (pos.y() < -200) {
+    moveYRect = +5;
+  } if (pos.y() > 100) {
+    moveYRect = -5;
   }
 #endif
   scene()->update();
@@ -76,7 +91,8 @@ void World::advance(int step) {
   if (!step)
     return;
 #ifdef ANIM
-  m_paths[1].translate(moveX, 0);
+  m_paths[1].translate(moveXCircle, 0);
+  m_paths[2].translate(0, moveYRect);
 #endif
 }
 

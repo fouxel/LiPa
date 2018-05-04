@@ -18,10 +18,7 @@ int Sim::run(int argc, char **argv) {
   QGraphicsScene scene;
   scene.setSceneRect(0, -100, 600, 600);
   scene.setItemIndexMethod(QGraphicsScene::NoIndex);
-  //! [2]
 
-  //! [3]
-  
   Normalizer norm;
   ai::QLearningModel model(norm);
   auto world = new sim::World();
