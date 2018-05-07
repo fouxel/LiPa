@@ -36,6 +36,7 @@ QPainterPath Line::shape() const {
 void Line::paint(QPainter *painter, const QStyleOptionGraphicsItem *,
                  QWidget *) {
   painter->setBrush(QColor(100, 100, 100));
+  painter->setPen(QPen(Qt::black, 3));
   for (auto &line : m_lines) {
     painter->drawLine(line);
   }

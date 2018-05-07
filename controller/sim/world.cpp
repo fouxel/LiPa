@@ -9,7 +9,7 @@
 using namespace sim;
 
 //#define RECT 1
-#define CIRCLE 1
+//#define CIRCLE 1
 //#define ANIM 1
 
 World::World() {
