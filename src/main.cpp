@@ -177,7 +177,7 @@ int main(void) {
   leftStop();
   rightStop();
   while (1) {
-	for (int i = 0; i < 3; ++i) {
+	//for (int i = 0; i < 3; ++i) {
 		for (auto &sensor : sensors) {
 			auto dist = sensor.getDistance();
 			trace_printf("distance original: %d\n", dist);
@@ -196,7 +196,7 @@ int main(void) {
 		}
     trace_printf("###########\n");
     _timer->sleep();
-	}
+	//}
 
 	auto action = read_char();
     trace_printf("action: %d\n", action);
@@ -209,8 +209,8 @@ int main(void) {
      * */
 
     if (action == 0) {
-    	leftForward(1420);
-    	rightForward(1380);
+    	leftForward(1380);
+    	rightForward(1370);
     } else if (action == 1) {
     	leftForward(1250);
     	rightStop();

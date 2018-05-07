@@ -95,7 +95,7 @@ UartController::~UartController()
 int UartController::run(int argc, char **argv) {
     UartNormalizer norm;
     ai::QLearningModel model(norm);
-    const char *portname = "/dev/ttyACM0";
+    const char *portname = "/dev/ttyACM1";
     int fd;
     int wlen;
 
@@ -111,7 +111,7 @@ int UartController::run(int argc, char **argv) {
     int rdlen;
     unsigned char buf;
 
-    constexpr auto distCount = 9;
+    constexpr auto distCount = 3;
     while (1) {
         distvec dist;
         dist.reserve(distCount);
@@ -135,12 +135,13 @@ int UartController::run(int argc, char **argv) {
        // for(int i = 0; i < dist.size(); ++i) {
        //   std::cout << "dist[" << i << "]: " << (int)dist[i] << std::endl;
        // }
-       sleep(1);
+       usleep(10000);
+       //sleep(1);
         distvec distAvg;
         distAvg.reserve(3);
-        distAvg.push_back((dist[0] + dist[3] + dist[6]) / 3);
-        distAvg.push_back((dist[1] + dist[4] + dist[7]) / 3);
-        distAvg.push_back((dist[2] + dist[5] + dist[8]) / 3);
+        distAvg.push_back((dist[0]));
+        distAvg.push_back((dist[1]));
+        distAvg.push_back((dist[2]));
         for(auto d : distAvg) {
           std::cout << "AVGD: " << d << std::endl;
         }

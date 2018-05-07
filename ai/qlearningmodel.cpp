@@ -29,8 +29,8 @@ float QLearningModel::getDiffReward(cdistvec &distances) const {
 
   std::vector<int> diffs(distances.size());
   assert(distances.size() == m_prevDistances.size());
-  std::transform(m_prevDistances.begin(), m_prevDistances.end(),
-                 distances.begin(), diffs.begin(), std::minus<int>());
+  std::transform(distances.begin(), distances.end(),
+                 m_prevDistances.begin(), diffs.begin(), std::minus<int>());
 
   std::cout << "diff size: " << diffs.size() << std::endl;
   for (const auto &diff : diffs) {
@@ -38,9 +38,9 @@ float QLearningModel::getDiffReward(cdistvec &distances) const {
     sum += diff;
   }
 
-  float reward = -0.2;
+  float reward = -0.3;
   if (sum >= 0) {
-    reward = 0.2;
+    reward = 0.3;
   }
   return reward;
 }
@@ -81,7 +81,7 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
   if (isTerminalState(distances)) {
     std::cout << "Terminal state" << std::endl;
     m_solver->stepUpdateQ(encodeState(m_prevDistances), m_prevAction,
-                          encodeState(distances), -100000);
+                          encodeState(distances), -100);
     m_prevDistances.clear();
     m_count++;
     return ACTION_TERMINATE;
@@ -102,7 +102,7 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
     action = ACTION_FORWARD;
     std::cout << "#### FORWARD ACTION" << std::endl;
   } else {
-    if (m_count % 5 == 0) {
+    if (m_count % 2 == 0) {
       std::cout << "#### POLICY ACTION" << std::endl;
       action = static_cast<Action>(policy.sampleAction(encodeState(distances)));
     } else {
@@ -125,7 +125,7 @@ IModel::Action QLearningModel::getAction(cdistvec &distances) {
   }
 
   float actionReward = 0;
-  switch (action) {
+  switch (m_prevAction) {
   case ACTION_FORWARD:
     actionReward = 0.2;
     break;
